@@ -1,8 +1,86 @@
-import { Button, TextField, Paper, Select, MenuItem } from "@material-ui/core";
+import {
+  Button,
+  TextField,
+  Paper,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+} from "@material-ui/core";
+import React, { useEffect, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
+import APIDATA from "../API/DataSource";
+import axios from "axios";
+import Swal from "sweetalert2";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 export default function FormData() {
   const classes = useStyles();
+  const [ktp, setKtp] = useState("");
+  // Provinsi
+  const [selectProvince, getSelectedProvince] = useState("");
+  const [province, setProvince] = useState([]);
+  //Kota
+  const [selectCity, getSelectedCity] = useState("");
+  const [city, setCity] = useState([]);
+  //Kecamatan
+  const [selectkecamatan, getSelectedkecamatan] = useState("");
+  const [camat, setCamat] = useState([]);
+
+  const [gender, setGender] = useState([]);
+  const [birthdate, setBirthDate] = useState(new Date());
+  const MyGender = [
+    { id: 1, title: "Pria" },
+    { id: 2, title: "Wanita" },
+  ];
+  const handleSelect = (event) => {
+    getSelectedProvince(event.target.value);
+  };
+  const citySelect = (event) => {
+    getSelectedCity(event.target.value);
+  };
+  const camatSelect = (event) =>{
+    getSelectedkecamatan(event.target.value)
+  }
+  const handleKtp = (event, value) => {
+    if (event.target.value.length >= 17) {
+      Swal.fire({
+        icon: "error",
+        title: "Max Length 16 Character",
+      });
+    }
+  };
+  const phoneMaxLength = (event, value) => {
+    if (event.target.value.length >= 14) {
+      Swal.fire({
+        icon: "error",
+        title: "Max Length 13 Character",
+        text: "Check The Length Of Your Phone number Again",
+      });
+    }
+  };
+  const HandleProvince = () => {
+    axios.get(`${APIDATA}/province`).then((res) => setProvince(res.data.data));
+  };
+
+  useEffect(() => {
+    HandleProvince();
+    const HandleCity = () => {
+      axios
+        .get(`${APIDATA}/city/?province_id=${selectProvince}`)
+        .then((res) => setCity(res.data.data));
+    };
+    const HandleKecamatan = () => {
+      axios
+        .get(`${APIDATA}/kecamatan/?city_id=${selectCity}`)
+        .then((res) => setCamat(res.data.data));
+    };
+    HandleCity();
+    HandleKecamatan();
+  }, [selectProvince, selectCity]);
+
   return (
     <div>
       <Paper className={classes.root}>
@@ -18,34 +96,47 @@ export default function FormData() {
           <TextField
             label="No KTP"
             id="margin-normal"
-            name="email"
-            //   defaultValue={formInput.name}
+            name="ktp"
             className={classes.textField}
-            helperText="e.g. name@gmail.com"
-            //   onChange={handleInput}
+            helperText="Max. Character 16"
+            onChange={(e, v) => handleKtp(e, v)}
           />
-          <TextField
-            label="Tanggal Lahir"
-            id="margin-normal"
-            name="email"
-            //   defaultValue={formInput.name}
-            className={classes.textField}
-            helperText="e.g. name@gmail.com"
-            //   onChange={handleInput}
-          />
-          <TextField
-            label="Jenis Kelamin"
-            id="margin-normal"
-            name="email"
-            //   defaultValue={formInput.name}
-            className={classes.textField}
-            helperText="e.g. name@gmail.com"
-            //   onChange={handleInput}
-          />
+          <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DatePicker
+              disableFuture
+              label="Tanggal Lahir"
+              openTo="year"
+              views={["year", "month", "day"]}
+              value={birthdate}
+              onChange={(newValue) => {
+                setBirthDate(newValue);
+              }}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Jenis kelamin</InputLabel>
+            <Select
+              className={classes.textField}
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              onChange={(e) => setGender(e.target.value)}
+              value={gender}
+              label="gender"
+              name="gender"
+            >
+              {MyGender.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.title}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Email"
             id="margin-normal"
             name="email"
+            type="email"
             //   defaultValue={formInput.name}
             className={classes.textField}
             helperText="e.g. name@gmail.com"
@@ -54,39 +145,80 @@ export default function FormData() {
           <TextField
             label="No Telp"
             id="margin-normal"
-            name="email"
-            //   defaultValue={formInput.name}
+            name="phone"
+            type="number"
             className={classes.textField}
-            helperText="e.g. name@gmail.com"
-            //   onChange={handleInput}
+            helperText="Max. 13 Character"
+            onChange={(e, v) => phoneMaxLength(e, v)}
           />
           <TextField
             label="Alamat Lengkap"
             id="margin-normal"
-            name="email"
-            //   defaultValue={formInput.name}
-            className={classes.textField}
+            name="address"
             helperText="e.g. name@gmail.com"
             //   onChange={handleInput}
           />
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Provinsi</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              onChange={handleSelect}
+              value={selectProvince}
+              label="Age"
+              name="province"
+            >
+              {province.map((item) => (
+                <MenuItem key={item.id} value={item.id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-          <Select
-            className={classes.textField}
-            labelId="demo-simple-select-error-label"
-            id="demo-simple-select-error"
-            value="Kecamatan"
-            placeholder="kecamatan"
-            label="Age"
-            //   onChange={handleChange}
-            renderValue={(value) => `Provinsi - ${value}`}
-          >
-            <MenuItem value="">
-              <em>None</em>
-            </MenuItem>
-            <MenuItem value={10}>Ten</MenuItem>
-            <MenuItem value={20}>Twenty</MenuItem>
-            <MenuItem value={30}>Thirty</MenuItem>
-          </Select>
+          {selectProvince ? (
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Kota</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                onChange={citySelect}
+                value={selectCity}
+                label="city"
+                name="city"
+              >
+                {city.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <p></p>
+          )}
+
+          {selectCity ? (
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">Kecamatan</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                onChange={camatSelect}
+                value={selectkecamatan}
+                label="kecamatan"
+                name="kecamatan"
+              >
+                {camat.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <p></p>
+          )}
           <Button
             type="submit"
             variant="contained"
@@ -102,7 +234,10 @@ export default function FormData() {
 }
 const useStyles = makeStyles((theme) => ({
   button: {
-    margin: theme.spacing(1),
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    marginTop: 20,
+    width: "100%",
   },
   leftIcon: {
     marginRight: theme.spacing(1),
@@ -114,15 +249,16 @@ const useStyles = makeStyles((theme) => ({
     fontSize: 20,
   },
   root: {
-    padding: theme.spacing(5, 5),
+    padding: theme.spacing(3, 3),
     display: "flex",
     justifyContent: "center",
     margin: "auto",
     width: "70%",
   },
   textField: {
-    marginLeft: theme.spacing(1),
-    marginRight: theme.spacing(1),
-    width: "100%",
+    marginLeft: theme.spacing(3),
+    marginRight: theme.spacing(3),
+    flex: "50%",
+    width: "20%",
   },
 }));
