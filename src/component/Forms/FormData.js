@@ -28,6 +28,12 @@ export default function FormData() {
   //Kecamatan
   const [selectkecamatan, getSelectedkecamatan] = useState("");
   const [camat, setCamat] = useState([]);
+  //kelurahan
+  const [selectkelurahan, getSelectedkelurahan] = useState("");
+  const [lurah, setlurah] = useState([]);
+  //PostCode
+  const [postalcode, setPostalCode] = useState([])
+
 
   const [gender, setGender] = useState([]);
   const [birthdate, setBirthDate] = useState(new Date());
@@ -43,6 +49,9 @@ export default function FormData() {
   };
   const camatSelect = (event) =>{
     getSelectedkecamatan(event.target.value)
+  }
+  const lurahSelect = (event) =>{
+    getSelectedkelurahan(event.target.value)
   }
   const handleKtp = (event, value) => {
     if (event.target.value.length >= 17) {
@@ -77,9 +86,15 @@ export default function FormData() {
         .get(`${APIDATA}/kecamatan/?city_id=${selectCity}`)
         .then((res) => setCamat(res.data.data));
     };
+    const HandleKelurahan = () =>{
+      axios
+        .get(`${APIDATA}/kelurahan/?kecamatan_id=${selectkecamatan}`)
+        .then((res) => setlurah(res.data.data));
+    }
     HandleCity();
     HandleKecamatan();
-  }, [selectProvince, selectCity]);
+    HandleKelurahan();
+  }, [selectProvince, selectCity,selectkecamatan]);
 
   return (
     <div>
@@ -219,6 +234,27 @@ export default function FormData() {
           ) : (
             <p></p>
           )}
+          {selectkecamatan ? (
+            <FormControl fullWidth>
+              <InputLabel id="demo-simple-select-label">kelurahan</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                onChange={lurahSelect}
+                value={selectkelurahan}
+                label="Kelurahan"
+                name="kelurahan"
+              >
+                {lurah.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          ) : (
+            <p></p>
+          )}
           <Button
             type="submit"
             variant="contained"
@@ -256,9 +292,9 @@ const useStyles = makeStyles((theme) => ({
     width: "70%",
   },
   textField: {
-    marginLeft: theme.spacing(3),
-    marginRight: theme.spacing(3),
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
     flex: "50%",
-    width: "20%",
+    width: "50%",
   },
 }));
