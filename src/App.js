@@ -1,8 +1,8 @@
-import Homepage from './component/Home/HomePage';
+import NavigatorPage from "./Router/NavigatorPage";
 
 function App() {
   return (
-    <Homepage />
+    <NavigatorPage />
   );
 }
 

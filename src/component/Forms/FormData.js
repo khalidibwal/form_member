@@ -15,8 +15,8 @@ import Swal from "sweetalert2";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-
-export default function FormData() {
+import {Link, useNavigate} from 'react-router-dom';
+export default function FormData(props) {
   const classes = useStyles();
   const [ktp, setKtp] = useState("");
   // Provinsi
@@ -60,6 +60,10 @@ export default function FormData() {
         title: "Max Length 16 Character",
       });
     }
+    else{
+      setKtp(event.target.value)
+    }
+    console.log("ktp",ktp)
   };
   const phoneMaxLength = (event, value) => {
     if (event.target.value.length >= 14) {
@@ -73,6 +77,10 @@ export default function FormData() {
   const HandleProvince = () => {
     axios.get(`${APIDATA}/province`).then((res) => setProvince(res.data.data));
   };
+  const navigate = useNavigate();
+  const OnSubmitData = () =>{
+    navigate('/summary',{state:{id:1,name:'sabaoon'}});
+  }
 
   useEffect(() => {
     HandleProvince();
@@ -260,6 +268,7 @@ export default function FormData() {
             variant="contained"
             color="primary"
             className={classes.button}
+            onClick={OnSubmitData}
           >
             Submit Form membership
           </Button>
