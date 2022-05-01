@@ -42,6 +42,7 @@ export default function FormData(props) {
   const [lurah, setlurah] = useState([]);
   //PostCode
   const [postalcode, setPostalCode] = useState([]);
+  const [postcode, setPostCode] = useState();
   const [gender, setGender] = useState([]);
   const [birthdate, setBirthDate] = useState(new Date());
   const MyGender = [
@@ -99,6 +100,20 @@ export default function FormData(props) {
   const HandleProvince = () => {
     axios.get(`${APIDATA}/province`).then((res) => setProvince(res.data.data));
   };
+  // const handlePostalCode = (event) =>{
+  //   axios.get(`${APIDATA}/?postcode=${event.target.value}`).then((res) => setPostalCode(res.data.data));
+  // }
+  const handlePostcode = (event) => {
+    if (event.target.value.length >= 6) {
+      Swal.fire({
+        icon: "error",
+        title: "Max Length 5 Character",
+        text: "PostCode Only have 5 Character",
+      });
+    } else {
+      setPostCode(event.target.value);
+    }
+  };
   const navigate = useNavigate();
   const OnSubmitData = () => {
     navigate("/summary", {
@@ -115,6 +130,7 @@ export default function FormData(props) {
         city: kota,
         kecamatan: kec,
         kelurahan: kel,
+        postal: postcode,
       },
     });
   };
@@ -216,6 +232,7 @@ export default function FormData(props) {
           />
           <TextField
             label="Alamat Lengkap"
+            className={classes.textField}
             id="margin-normal"
             name="address"
             onChange={sendAddress}
@@ -302,6 +319,16 @@ export default function FormData(props) {
           ) : (
             <p></p>
           )}
+          <TextField
+            label="PostCode"
+            id="margin-normal"
+            name="postcode"
+            type="number"
+            className={classes.textField}
+            helperText="Max. 5 Character"
+            onChange={(e, v) => handlePostcode(e, v)}
+          />
+
           <Button
             type="submit"
             variant="contained"
@@ -337,7 +364,7 @@ const useStyles = makeStyles((theme) => ({
     display: "flex",
     justifyContent: "center",
     margin: "auto",
-    width: "70%",
+    width: "50%",
   },
   textField: {
     marginLeft: theme.spacing(1),
